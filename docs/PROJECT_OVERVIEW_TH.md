@@ -22,6 +22,25 @@
 - `chat/tools.py` — tools ที่ AI เรียกใช้เพื่อ query ข้อมูลจริง
 - `chat/prompts.py` — system prompts สำหรับ classify / trip / friendly / payment verify
 
+### 2.1 อธิบายไฟล์ต่าง ๆ แบบเร็ว
+
+| ไฟล์ | ทำหน้าที่ | ทำไมต้องรู้ |
+|---|---|---|
+| `tripbot/settings.py` | รวม config หลักของระบบ เช่น DB, ENV, LINE, CORS, static/media | เวลา run ไม่ขึ้นหรือ config เพี้ยน มักต้องเริ่มดูไฟล์นี้ก่อน |
+| `tripbot/urls.py` | ประกาศ route หลักของโปรเจกต์ | ใช้เช็กว่าคำขอจาก frontend/LINE/API เข้ามาที่ endpoint ไหน |
+| `chat/models.py` | นิยามโครงสร้างข้อมูลธุรกิจทั้งหมด | ถ้าไม่เข้าใจไฟล์นี้ จะตาม flow การจอง การชำระเงิน และ history แชตได้ยาก |
+| `chat/serializers.py` | แปลง model เป็น JSON และรับ JSON เข้า model | สำคัญเวลาทำ API หรือ debug ว่าข้อมูลที่ส่งออก/รับเข้ามี shape แบบไหน |
+| `chat/api_views.py` | รวม DRF ViewSet และ custom actions | เป็นจุดหลักของ backend CRUD เช่น trips, bookings, payments |
+| `chat/urls.py` | map ViewSet ของ app `chat` เข้ากับ router | ช่วยดูว่า resource ไหน expose เป็น API บ้าง |
+| `chat/line_webhook.py` | รับ event จาก LINE, เรียก AI, ส่งข้อความกลับ, จัดการ state | ถือเป็นหัวใจของ flow production เพราะข้อความลูกค้าเข้ามาทางนี้จริง |
+| `chat/agent.py` | รวม logic ฝั่ง AI orchestration | ใช้ตัดสินว่าจะ classify, ตอบแบบคุยทั่วไป, ใช้ tools, หรือวิเคราะห์สลิป |
+| `chat/tools.py` | ฟังก์ชันที่ AI ใช้ดึงข้อมูลจริงจากระบบ | เป็นตัวเชื่อมระหว่าง LLM กับข้อมูลจากฐานข้อมูล |
+| `chat/prompts.py` | เก็บ system prompts/instructions ของ AI | เวลา AI ตอบไม่ตรงโจทย์ ส่วนใหญ่ต้องกลับมาดูไฟล์นี้ |
+| `chat/templates/chat.html` | หน้าเว็บแชตเดโมแบบง่าย | ช่วยดูภาพรวม frontend ที่มีใน repo นี้ แม้ยังไม่ใช่ production UI หลัก |
+| `chat/tests.py` | จุดเริ่มสำหรับเขียน automated tests | ตอนนี้ยังมีน้อย จึงเป็นพื้นที่ที่ควรขยายต่อในอนาคต |
+| `chat/management/commands/` | management commands สำหรับงานทดสอบ/seed/mock | มีประโยชน์เวลาต้องรันงานช่วยเหลือผ่าน `manage.py` |
+| `chat/migrations/` | ประวัติ schema migration ของ Django | ใช้ตรวจว่าฐานข้อมูลเปลี่ยนอะไรไปบ้างและสัมพันธ์กับ model อย่างไร |
+
 ## 3) Backend (Django/DRF)
 
 ### 3.1 Routing
