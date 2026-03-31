@@ -138,3 +138,63 @@
 - [ ] เข้าใจ response schema ที่ AI ส่ง (`response_type`, `response_content`, `response_meta`)
 - [ ] เข้าใจ Flex message helper ที่ใช้ตอบใน LINE
 - [ ] ทดสอบกรณี text + image (pending_payment) + feedback flow
+
+---
+
+## 11) รูปแบบ “เล่มรายงาน” หัวข้อ 4.1: อธิบายไฟล์ใน Repository
+
+หัวข้อนี้เขียนในโทนรายงาน เพื่อใช้อ้างอิงในเอกสารส่งงาน/พรีเซนต์ โดยสรุปไฟล์ของโปรเจกต์ตามชั้นสถาปัตยกรรม
+
+### 4.1.1 กลุ่มไฟล์ระดับ Project (ตั้งค่าระบบหลัก)
+
+| ไฟล์ | บทบาทในระบบ | ประเด็นสำคัญเชิงรายงาน |
+|---|---|---|
+| `manage.py` | จุดเริ่มต้นคำสั่ง Django เช่น runserver/migrate/command | แสดงว่า backend ใช้ Django project มาตรฐาน |
+| `tripbot/settings.py` | รวมค่ากำหนดระบบ เช่น DB, timezone, CORS, static, env | ใช้อธิบายการแยก config ผ่าน environment variables |
+| `tripbot/urls.py` | route หลักของทั้งระบบ (`admin/`, `webhook/line/`, `api/`) | ใช้เชื่อมโยงภาพรวม request flow จากภายนอกเข้าสู่ระบบ |
+| `tripbot/wsgi.py` | entrypoint สำหรับ deployment ฝั่ง WSGI | ใช้ระบุวิธีนำระบบขึ้น production server |
+| `requirements.txt` | รายการ dependencies ของระบบ | ใช้ยืนยันเทคโนโลยีหลักที่เลือกใช้ในโครงการ |
+| `Dockerfile` | วิธี build container ของแอป | ใช้อธิบายแนวทาง deploy แบบ containerized |
+
+### 4.1.2 กลุ่มไฟล์ Backend (Business Logic + API)
+
+| ไฟล์/โฟลเดอร์ | บทบาทในระบบ | ประเด็นสำคัญเชิงรายงาน |
+|---|---|---|
+| `chat/models.py` | นิยามโครงสร้างข้อมูลธุรกิจ (Trip/Booking/Payment/Line*) | เป็นแกนข้อมูลที่อธิบาย domain model ของโครงการ |
+| `chat/serializers.py` | แปลงข้อมูลระหว่าง Model และ JSON | อธิบายชั้น data contract ของ REST API |
+| `chat/api_views.py` | DRF ViewSet และ custom actions | อธิบายบริการ API ที่รองรับหน้าแอดมิน/ระบบภายนอก |
+| `chat/urls.py` | รวม route ของ app `chat` ผ่าน router | ชี้ว่าระบบใช้แนวทาง resource-based API |
+| `chat/migrations/` | ประวัติการเปลี่ยน schema ฐานข้อมูล | แสดงความต่อเนื่องของการพัฒนาฐานข้อมูล |
+| `chat/admin.py` | ลงทะเบียน model ใน Django admin | สนับสนุนการจัดการข้อมูลหลังบ้าน |
+| `chat/tests.py` | จุดเริ่มต้นชุดทดสอบอัตโนมัติ | ระบุช่องว่างงานทดสอบที่ควรขยาย |
+
+### 4.1.3 กลุ่มไฟล์ AI (LLM + Prompt + Tools)
+
+| ไฟล์ | บทบาทในระบบ | ประเด็นสำคัญเชิงรายงาน |
+|---|---|---|
+| `chat/agent.py` | orchestration ของ AI (classify / friendly / admin / payment-verify) | อธิบายแนวคิด Hybrid AI: LLM + business tools |
+| `chat/prompts.py` | เก็บ system instructions และกฎการตอบ | ชี้ให้เห็นการกำกับพฤติกรรม AI เชิงนโยบาย |
+| `chat/tools.py` | ฟังก์ชันที่ AI เรียกเพื่อดึงข้อมูลจริง | อธิบายความสามารถ AI ที่ไม่พึ่งการ “เดา” จากโมเดลล้วน |
+| `chat/langchain_utils.py` | utility เสริมสำหรับงาน LangChain | แสดงส่วนขยายเพื่อรองรับงานข้อมูล/เอกสาร |
+| `chat/ingest_thaisum.py` | สคริปต์เตรียม/นำเข้าข้อมูลสำหรับงาน AI | ใช้อธิบาย data preparation pipeline เบื้องต้น |
+
+### 4.1.4 กลุ่มไฟล์ Integration (เชื่อมต่อ LINE และช่องทางสื่อสาร)
+
+| ไฟล์ | บทบาทในระบบ | ประเด็นสำคัญเชิงรายงาน |
+|---|---|---|
+| `chat/line_webhook.py` | รับ event จาก LINE, ประมวลผล, ตอบกลับ (text/flex) | เป็นจุด integration หลักระหว่างผู้ใช้จริงกับ AI/backend |
+| `chat/management/commands/test_line_webhook.py` | คำสั่งทดสอบการทำงาน webhook | สนับสนุนการทดสอบเชิง integration |
+| `chat/management/commands/mock_ratings.py` | คำสั่งจำลองข้อมูล rating | สนับสนุนการทดสอบ flow หลังจบทริป |
+
+### 4.1.5 กลุ่มไฟล์ Frontend / เอกสาร / Utility
+
+| ไฟล์/โฟลเดอร์ | บทบาทในระบบ | ประเด็นสำคัญเชิงรายงาน |
+|---|---|---|
+| `chat/templates/chat.html` | หน้าเว็บแชตเดโม | ใช้สาธิตการโต้ตอบพื้นฐานกับ backend |
+| `docs/PROJECT_OVERVIEW_TH.md` | เอกสาร onboarding ภาษาไทย | ใช้เป็นคู่มือเริ่มต้นของทีมพัฒนา |
+| `README.md` | วิธีติดตั้ง/รันระบบเบื้องต้น | อธิบายขั้นตอนเริ่มใช้งานสำหรับ developer ใหม่ |
+| `sql_script/` | สคริปต์ SQL/ข้อมูลสนับสนุน | ใช้ช่วยเตรียมข้อมูลและงาน migration เฉพาะกิจ |
+
+### 4.1.6 สรุปเชิงวิชาการของโครงสร้างไฟล์
+
+โครงสร้างไฟล์ของโครงการนี้สะท้อนสถาปัตยกรรมแบบแยกหน้าที่ชัดเจน ได้แก่ (1) ชั้นระบบและการตั้งค่า, (2) ชั้นธุรกิจและ API, (3) ชั้น AI orchestration, และ (4) ชั้น integration กับแพลตฟอร์มภายนอก (LINE) ซึ่งช่วยให้ทีมสามารถพัฒนา ทดสอบ และขยายระบบในแต่ละส่วนได้อย่างเป็นอิสระมากขึ้น
